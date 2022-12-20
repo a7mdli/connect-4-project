@@ -106,7 +106,7 @@ int countDiagonally(_Bool counted, int i, int j) {
 }
 
 void updateScore(playerData *player, int i, int j) {
-    player->score = countHorizontally(player->identifier,i,j) + countVertically(player->identifier,i,j) + countDiagonally(player->identifier,i,j);
+    player->score += countHorizontally(player->identifier,i,j) + countVertically(player->identifier,i,j) + countDiagonally(player->identifier,i,j);
 }
 
 void addMoves(playerData *player) {
