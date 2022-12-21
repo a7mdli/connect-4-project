@@ -23,18 +23,35 @@ typedef struct
 playerData player1 = {"player 1",0,0,0};
 playerData player2 = {"player 2",0,0,1};
 
+typedef struct {
+    int i;
+    int j;
+    playerData movingPlayer;
+}gameInfo;
+
+gameInfo undoList[7*9];
+
+void updateUndoList (playerData playerMoved, i, j, moveNumber) {
+    undoList[moveNumber].i = i;
+    undoList[moveNumber].j = j;
+    undoList[moveNumber].movingPlayer = playerMoved;
+    //int *totalMoves = lastRecordedMove;
+    //totalMoves++;
+}
+
+
 void display_time(){
 
-int count,minutes;
+int minutes;
 int timer;
 timer=(clock()-start_time)/1000;
-    
+
 if(timer>59){
     minutes=timer/60;
     timer=timer%60;
     }
-    
-printf("\n\t%02d:%02ld\n",minutes,timer);
+
+printf("\n\t%02d:%02d\n",minutes,timer);
 }
 
 
@@ -164,7 +181,7 @@ void updateScore(playerData *player, int i, int j)
 
 void original_grid( char gridarr[ROW][COL])
 {
-    int j,i,symbol;
+    int j,i;
     for(i=0; i<ROW; i++) {
         for(j=0; j<COL; j++) {
             gridarr[i][j]='-';
@@ -175,11 +192,11 @@ void original_grid( char gridarr[ROW][COL])
 
 void print(char gridarr[ROW][COL]) {
     int j,i;
-    
-    printf("\t1\t2\t3\t4\t5\t6\t7\t8\t9\t\n");
+
+    printf("\t1\t2\t3\t4\t5\t6\t7\t\n");
 
     for(i=0; i<ROW; i++) {
-        for(j=0; j<COL; j++) {            
+        for(j=0; j<COL; j++) {
             if(gridarr[i][j]=='-') {
                 if(i==0&&j==0) {
                     printf("\t%c\t",gridarr[i][j]);
@@ -209,103 +226,74 @@ void print(char gridarr[ROW][COL]) {
 }
 
 
-void putDisk(char gridarr[ROW][COL],int j,int *identify,int *moves)
+void putDisk(char gridarr[ROW][COL],int j,_Bool *identify,int *moves)
 {
-    int lastEmptyRow = row -1;
+    int i = ROW -1;
     while(1) {
-        if(gridarr[lastEmptyRow][j]=='-') {
-            if(*identify==1) {
-                gridarr[lastEmptyRow][j]=0;
-                updateScore(&player1,lastEmptyRow,j);
+        if(gridarr[i][j]=='-') {
+            if(*identify==0) {
+                gridarr[i][j]=0;
+                updateScore(&player1,i,j);
                 addMoves(&player1);
+                updateUndoList(player1,i,j,*moves);
                 (*moves)++;
                 break;
             }
-            
-            else if(*identify==2) {
-                gridarr[lastEmptyRow][j]=1;
-                updateScore(&player2,lastEmptyRow,j);
+
+            else if(*identify==1) {
+                gridarr[i][j]=1;
+                updateScore(&player2,i,j);
                 addMoves(&player2);
+                updateUndoList(player2,i,j,*moves);
                 (*moves)++;
                 break;
             }
         }
         else {
-            lastEmptyRow--;
+            i--;
         }
     }
-
-    play(gridarr,moves,identify);
 }
 
-void play(char gridarr[ROW][COL],int *moves,int *identify)
+void play(char gridarr[ROW][COL],int *moves,_Bool *identify)
 {
-    //int symbol;
+    int enteredColumn;
+    //clear console and update it with previous action
     system("cls");
-
     print(gridarr);
-    *identify = (*moves%2)+1;
-    /*if(*moves%2==0) {
-        *identify=1;
-    }
     
-    else if(*moves%2==1) {
-        *identify=2;
-    }*/
-    printf("\n\tplayer %d your turn now :\n\t",*identify);
-    scanf("%d",&symbol);
-    while(gridarr[0][symbol-1]!='-')
+    //decide which player is about to play
+    *identify = ((*moves)%2);
+    
+    printf("\n\tplayer %d your turn now :\n\t",*identify+1);
+    scanf("%d",&enteredColumn);
+    while(gridarr[0][enteredColumn-1]!='-')
     {
-
         printf("column  is full \n please enter another column:\n");
-
-        scanf("%d",&symbol);
-
+        scanf("%d",&enteredColumn);
     }
 
-
-    while(!(symbol>0&&symbol<=COL))
+    while(!(enteredColumn>0&&enteredColumn<=COL))
     {
-
         printf("enter valid columns between 1:%d:\n",COL);
-
-        scanf("%d",&symbol);
-
-
-
-
-
+        scanf("%d",&enteredColumn);
     }
-
-
-    //i=ROW-1;
-    //j=symbol-1;
-    putDisk(gridarr,symbol-1,identify,moves);
-
-
+    putDisk(gridarr,enteredColumn-1,identify,moves);
 }
 
 
 int main()
 {
-    int j,i,symbol;
-    int identif=0,playe=0;
-    int *moves=playe;
-    int *identify=identif;
-
-
-    // char symbol;
-
-
+    _Bool playerIdentifer=0;
+    int totalMoves=0, lastMove=0;
     original_grid(gridarr);
-
-       start_time=clock();
-    play(gridarr,&playe,&identif);
-
-
+    start_time=clock();
+    while (1) {
+        play(gridarr,&totalMoves,&playerIdentifer);
+        lastMove = moves;
+    }
 
 
     return 0;
 }
-
 
