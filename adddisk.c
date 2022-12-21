@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <windows.h>
 #include <time.h>
 #include <conio.h>
 #define ROW 9
 #define COL 7
+
 time_t start_time;
 
 char figures[2] = {'x','o'};
@@ -25,26 +25,16 @@ playerData player2 = {"player 2",0,0,1};
 
 void display_time(){
 
-
 int count,minutes;
-
 int timer;
-
-
-
 timer=(clock()-start_time)/1000;
+    
 if(timer>59){
-
-
     minutes=timer/60;
     timer=timer%60;
-
-
-}
+    }
+    
 printf("\n\t%02d:%02ld\n",minutes,timer);
-
-
-
 }
 
 
@@ -175,152 +165,93 @@ void updateScore(playerData *player, int i, int j)
 void original_grid( char gridarr[ROW][COL])
 {
     int j,i,symbol;
-
-    for(i=0; i<ROW; i++)
-    {
-        for(j=0; j<COL; j++)
-        {
-
+    for(i=0; i<ROW; i++) {
+        for(j=0; j<COL; j++) {
             gridarr[i][j]='-';
-
         }
-
     }
-
-
-
 }
-void print(char gridarr[ROW][COL],int* identify)
-{
 
-    int j,i,symbol;
 
+void print(char gridarr[ROW][COL]) {
+    int j,i;
+    
     printf("\t1\t2\t3\t4\t5\t6\t7\t8\t9\t\n");
 
-
-    for(i=0; i<ROW; i++)
-    {
-        for(j=0; j<COL; j++)
-        {
-
-            if(gridarr[i][j]=='-')
-            {
-
-                if(i==0&&j==0)
-                {
+    for(i=0; i<ROW; i++) {
+        for(j=0; j<COL; j++) {            
+            if(gridarr[i][j]=='-') {
+                if(i==0&&j==0) {
                     printf("\t%c\t",gridarr[i][j]);
                 }
-                else
-                {
+                else {
                     printf("%c\t",gridarr[i][j]);
                 }
-
             }
 
-
-
-
-            else
-            {
-                if(i==0&&j==0)
-                {
+            else {
+                if(i==0&&j==0) {
                     printf("\t%c\t",figures[gridarr[i][j]]);
                 }
-                else
-                {
+                else {
                     printf("%c\t",figures[gridarr[i][j]]);
                 }
-
-
             }
-
         }
         printf("\n\n\t" );
-
     }
-
-
-        printf("Score of player 1:%d\n",player1.score);
-        printf("\tmoves of player 1:%d\n",player1.moves);
-
-      printf("\t-------------------------------------------\n");
-
-
-        printf("\tScore of player 2:%d\n",player2.score);
-
-        printf("\tmoves of player 2:%d\n",player2.moves);
-
-        display_time();
-
-
-
-
-
+    printf("Score of player 1:%d\n",player1.score);
+    printf("\tmoves of player 1:%d\n",player1.moves);
+    printf("\t-------------------------------------------\n");
+    printf("\tScore of player 2:%d\n",player2.score);
+    printf("\tmoves of player 2:%d\n",player2.moves);
+    display_time();
 }
 
-void putDisk(char gridarr[ROW][COL],int i,int j,int *identify,int *moves)
+
+void putDisk(char gridarr[ROW][COL],int j,int *identify,int *moves)
 {
-
-    while(1)
-    {
-
-
-
-
-        if(gridarr[i][j]=='-')
-        {
-            if(*identify==1)
-            {
-                gridarr[i][j]=0;
-                updateScore(&player1,i,j);
+    int lastEmptyRow = row -1;
+    while(1) {
+        if(gridarr[lastEmptyRow][j]=='-') {
+            if(*identify==1) {
+                gridarr[lastEmptyRow][j]=0;
+                updateScore(&player1,lastEmptyRow,j);
                 addMoves(&player1);
                 (*moves)++;
                 break;
-
             }
-            else if(*identify==2)
-            {
-
-                gridarr[i][j]=1;
-                updateScore(&player2,i,j);
+            
+            else if(*identify==2) {
+                gridarr[lastEmptyRow][j]=1;
+                updateScore(&player2,lastEmptyRow,j);
                 addMoves(&player2);
                 (*moves)++;
                 break;
             }
-
         }
-        else
-        {
-
-            i--;
-
+        else {
+            lastEmptyRow--;
         }
     }
 
     play(gridarr,moves,identify);
-
-    //system("cls");
-
-
 }
 
 void play(char gridarr[ROW][COL],int *moves,int *identify)
 {
-    int j,i,symbol,score;
+    //int symbol;
     system("cls");
 
-    print(gridarr,identify);
-
-    if(*moves%2==0)
-    {
-
+    print(gridarr);
+    *identify = (*moves%2)+1;
+    /*if(*moves%2==0) {
         *identify=1;
-
     }
-    else if(*moves%2==1)
-    {
+    
+    else if(*moves%2==1) {
         *identify=2;
-    }
+    }*/
     printf("\n\tplayer %d your turn now :\n\t",*identify);
     scanf("%d",&symbol);
     while(gridarr[0][symbol-1]!='-')
@@ -347,9 +278,9 @@ void play(char gridarr[ROW][COL],int *moves,int *identify)
     }
 
 
-    i=ROW-1;
-    j=symbol-1;
-    putDisk(gridarr,i,j,identify,moves);
+    //i=ROW-1;
+    //j=symbol-1;
+    putDisk(gridarr,symbol-1,identify,moves);
 
 
 }
