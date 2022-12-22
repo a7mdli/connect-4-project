@@ -18,14 +18,13 @@ char gridarr[ROW][COL];
 
 typedef struct
 {
-    char name[9];
     int score;
     int moves;
     _Bool identifier;
 } playerData;
 
-playerData player1 = {"player 1",0,0,0};
-playerData player2 = {"player 2",0,0,1};
+playerData player1 = {0,0,0};
+playerData player2 = {0,0,1};
 
 typedef struct {
     int i;
@@ -33,12 +32,12 @@ typedef struct {
     playerData movingPlayer;
 }gameInfo;
 
-gameInfo undoList[ROW*COL+1];
+gameInfo undoList[ROW*COL+2] = {{0,0,{0,0,0}},{0,0,{0,0,1}}};
 
 void updateUndoList (playerData playerMoved, int i, int j, int moveNumber) {
     undoList[moveNumber].i = i;
     undoList[moveNumber].j = j;
-    undoList[moveNumber].movingPlayer = playerMoved;
+    undoList[moveNumber+2].movingPlayer = playerMoved;
 }
 
 void undo (int *move) {
@@ -55,24 +54,22 @@ void undo (int *move) {
         (*movedPlayer).score = undoList[(*move)-1].movingPlayer.score;
     }
     *move=*move - 1;
-    //print(gridarr);
 }
 
 void redo (int *move) {
-    gridarr[undoList[*move+1].i][undoList[*move+1].j] = undoList[*move+1].movingPlayer.identifier;
+    gridarr[undoList[*move].i][undoList[*move].j] = undoList[*move].movingPlayer.identifier;
     playerData *movedPlayer;
-    if (undoList[*move+1].movingPlayer.identifier == player1.identifier) {
+    if (undoList[*move].movingPlayer.identifier == player1.identifier) {
         movedPlayer = &player1;
-        (*movedPlayer).moves = undoList[*move+1].movingPlayer.moves;
-        (*movedPlayer).score = undoList[*move+1].movingPlayer.score;
+        (*movedPlayer).moves = undoList[*move+2].movingPlayer.moves;
+        (*movedPlayer).score = undoList[*move+2].movingPlayer.score;
     }
-    else if (undoList[*move+1].movingPlayer.identifier == player2.identifier) {
+    else if (undoList[*move].movingPlayer.identifier == player2.identifier) {
         movedPlayer = &player2;
-        (*movedPlayer).moves = undoList[*move+1].movingPlayer.moves;
-        (*movedPlayer).score = undoList[*move+1].movingPlayer.score;
+        (*movedPlayer).moves = undoList[*move+2].movingPlayer.moves;
+        (*movedPlayer).score = undoList[*move+2].movingPlayer.score;
     }
     *move = *move + 1;
-    //print(gridarr);
 }
 
 void openMenu () {
@@ -92,9 +89,6 @@ void openMenu () {
         if (moves<lastMove) {
             redo(&moves);
         }
-        /*else {
-            printf("There is no move to redo");
-        }*/
     }
 }
 
@@ -291,18 +285,18 @@ void putDisk(char gridarr[ROW][COL],int j,_Bool *identify,int *moves)
         if(gridarr[i][j]=='-') {
             if(*identify==0) {
                 gridarr[i][j]=0;
-                updateUndoList(player1,i,j,*moves);
                 updateScore(&player1,i,j);
                 addMoves(&player1);
+                updateUndoList(player1,i,j,*moves);
                 (*moves)++;
                 break;
             }
 
             else if(*identify==1) {
                 gridarr[i][j]=1;
-                updateUndoList(player2,i,j,*moves);
                 updateScore(&player2,i,j);
                 addMoves(&player2);
+                updateUndoList(player2,i,j,*moves);
                 (*moves)++;
                 break;
             }
