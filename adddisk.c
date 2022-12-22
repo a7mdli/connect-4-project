@@ -8,6 +8,10 @@
 
 time_t start_time;
 
+int lastMove;
+
+int moves;
+
 char figures[2] = {'x','o'};
 
 char gridarr[ROW][COL];
@@ -29,16 +33,70 @@ typedef struct {
     playerData movingPlayer;
 }gameInfo;
 
-gameInfo undoList[7*9];
+gameInfo undoList[ROW*COL+1];
 
-void updateUndoList (playerData playerMoved, i, j, moveNumber) {
+void updateUndoList (playerData playerMoved, int i, int j, int moveNumber) {
     undoList[moveNumber].i = i;
     undoList[moveNumber].j = j;
     undoList[moveNumber].movingPlayer = playerMoved;
-    //int *totalMoves = lastRecordedMove;
-    //totalMoves++;
 }
 
+void undo (int *move) {
+    gridarr[(undoList[*move-1]).i][(undoList[*move-1]).j] = '-';
+    playerData *movedPlayer;
+    if (undoList[*move-1].movingPlayer.identifier == player1.identifier) {
+        movedPlayer = &player1;
+        (*movedPlayer).moves = undoList[(*move)-1].movingPlayer.moves;
+        (*movedPlayer).score = undoList[(*move)-1].movingPlayer.score;
+    }
+    else if (undoList[*move-1].movingPlayer.identifier == player2.identifier) {
+        movedPlayer = &player2;
+        (*movedPlayer).moves = undoList[(*move)-1].movingPlayer.moves;
+        (*movedPlayer).score = undoList[(*move)-1].movingPlayer.score;
+    }
+    *move=*move - 1;
+    //print(gridarr);
+}
+
+void redo (int *move) {
+    gridarr[undoList[*move+1].i][undoList[*move+1].j] = undoList[*move+1].movingPlayer.identifier;
+    playerData *movedPlayer;
+    if (undoList[*move+1].movingPlayer.identifier == player1.identifier) {
+        movedPlayer = &player1;
+        (*movedPlayer).moves = undoList[*move+1].movingPlayer.moves;
+        (*movedPlayer).score = undoList[*move+1].movingPlayer.score;
+    }
+    else if (undoList[*move+1].movingPlayer.identifier == player2.identifier) {
+        movedPlayer = &player2;
+        (*movedPlayer).moves = undoList[*move+1].movingPlayer.moves;
+        (*movedPlayer).score = undoList[*move+1].movingPlayer.score;
+    }
+    *move = *move + 1;
+    //print(gridarr);
+}
+
+void openMenu () {
+    short int option;
+    printf("Enter 1 to undo\n");
+    printf("Enter 2 to redo\n");
+    printf("Enter 3 to save\n");
+    printf("Enter 4 to exit\n");
+    scanf("%hi",&option);
+
+    if (option == 1) {
+        if (moves>0) {
+            undo(&moves);
+        }
+    }
+    else if (option == 2) {
+        if (moves<lastMove) {
+            redo(&moves);
+        }
+        /*else {
+            printf("There is no move to redo");
+        }*/
+    }
+}
 
 void display_time(){
 
@@ -208,10 +266,10 @@ void print(char gridarr[ROW][COL]) {
 
             else {
                 if(i==0&&j==0) {
-                    printf("\t%c\t",figures[gridarr[i][j]]);
+                    printf("\t%c\t",figures[(int)gridarr[i][j]]);
                 }
                 else {
-                    printf("%c\t",figures[gridarr[i][j]]);
+                    printf("%c\t",figures[(int)gridarr[i][j]]);
                 }
             }
         }
@@ -233,18 +291,18 @@ void putDisk(char gridarr[ROW][COL],int j,_Bool *identify,int *moves)
         if(gridarr[i][j]=='-') {
             if(*identify==0) {
                 gridarr[i][j]=0;
+                updateUndoList(player1,i,j,*moves);
                 updateScore(&player1,i,j);
                 addMoves(&player1);
-                updateUndoList(player1,i,j,*moves);
                 (*moves)++;
                 break;
             }
 
             else if(*identify==1) {
                 gridarr[i][j]=1;
+                updateUndoList(player2,i,j,*moves);
                 updateScore(&player2,i,j);
                 addMoves(&player2);
-                updateUndoList(player2,i,j,*moves);
                 (*moves)++;
                 break;
             }
@@ -261,39 +319,46 @@ void play(char gridarr[ROW][COL],int *moves,_Bool *identify)
     //clear console and update it with previous action
     system("cls");
     print(gridarr);
-    
+
     //decide which player is about to play
     *identify = ((*moves)%2);
-    
+
     printf("\n\tplayer %d your turn now :\n\t",*identify+1);
     scanf("%d",&enteredColumn);
+    if (enteredColumn==0) {
+            openMenu();
+            return;
+    }
+    while(!(enteredColumn>0&&enteredColumn<=COL))
+    {
+        printf("enter valid columns between 1:%d:\n",COL);
+        scanf("%d",&enteredColumn);
+
+    }
+
     while(gridarr[0][enteredColumn-1]!='-')
     {
         printf("column  is full \n please enter another column:\n");
         scanf("%d",&enteredColumn);
     }
 
-    while(!(enteredColumn>0&&enteredColumn<=COL))
-    {
-        printf("enter valid columns between 1:%d:\n",COL);
-        scanf("%d",&enteredColumn);
-    }
     putDisk(gridarr,enteredColumn-1,identify,moves);
+    int *lastMovePlayed = &lastMove;
+    *lastMovePlayed = *moves;
 }
 
 
 int main()
 {
     _Bool playerIdentifer=0;
-    int totalMoves=0, lastMove=0;
+    lastMove=0;
+    moves=0;
     original_grid(gridarr);
     start_time=clock();
     while (1) {
-        play(gridarr,&totalMoves,&playerIdentifer);
-        lastMove = moves;
+        play(gridarr,&moves,&playerIdentifer);
     }
 
 
     return 0;
 }
-
