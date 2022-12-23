@@ -21,8 +21,8 @@ char gridArr[ROW][COL];
 
 int score1;
 int moves1;
- int score2;
-    int moves2;
+int score2;
+int moves2;
 
 }storeGrid;
 
@@ -30,7 +30,6 @@ int moves1;
 
 typedef struct
 {
-     char name[100];
     int score;
     int moves;
     _Bool identifier;
