@@ -6,6 +6,7 @@ int load_game(int ROW,int COL,char gridarr[ROW][COL],gameInfo undoList[]);
 
 int load_game(int ROW,int COL,char gridarr[ROW][COL],gameInfo undoList[])
 {
+    int check_char;
     typedef struct
 {
 
@@ -49,8 +50,37 @@ storeGrid grid;
 
     while((number_game!=3)&&(number_game!=1)&&(number_game!=2))
     {
-        printf("number between 1:3 :\n");
-        scanf("%d",&number_game);
+        printf("--->number between 1:3 :\n");
+
+
+
+         while(1)
+    {
+        beging:
+
+         check_char=scanf("%d",&number_game);
+         if(check_char!=1){
+         gets(&number_game);
+
+          printf("--->enter number between 1:3 :\n");
+
+
+         }
+
+         else if(!(number_game>0&&number_game<=3)){
+            printf("---->enter  number between 1:3\n",COL);
+            goto beging;
+
+         }
+         else{
+
+            break;
+         }
+
+
+    }
+
+
 
     }
 
@@ -160,14 +190,34 @@ storeGrid grid;
     fseek(address_file,0,SEEK_END);
     size=ftell(address_file);
     size=(size)/(sizeof(storeGrid));
-
+    fclose(address_file);
     if(size>3){
 
-        printf("the storage of the game is FULL  you can't save any game \n");
-          sleep(1);
-         load_player(ROW,COL,gridarr,undoList);
-                return;
-       }
+       /* printf("the storage of the game is FULL\n");
+        printf("IF YOU WANT TO DELETE THE FIRST GAME AND STORE YOUR GAME  PRESS 1\n");
+        printf("IF NOT PRESS  2\n");
+
+
+        scanf("%d",&chooseSaveOR);
+
+         /* if(chooseSaveOR==1){
+                  save_games=malloc(sizeof(storeGrid)*3);
+                   fseek(address_file,-3*sizeof(storeGrid),SEEK_END);
+                     fread(save_games,sizeof(storeGrid),3,address_file);
+                      fclose(address_file);
+
+                       address_file=fopen("st.bin","wb");
+                       fwrite(save_games, sizeof(storeGrid),3, address_file);
+                       fclose(address_file);
+                       free(save_games);*/
+
+                      printf("--------------the storage is full-------------- ");
+                       sleep(1);
+
+
+                 load_player(ROW,COL,gridarr,undoList);
+                return;}
+
 
         else if(chooseSaveOR==2){
                  load_player(ROW,COL,gridarr,undoList);
