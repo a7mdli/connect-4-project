@@ -8,9 +8,9 @@
 #include <windows.h>
 #include <time.h>
 #include <conio.h>
-#include "parseXML.h"
-#define ROW 4
-#define COL 4
+//#include "parseXML.h"
+//#define ROW 4
+//#define COL 4
 
 _Bool playerIdentifer=0;
 time_t start_time;
@@ -23,7 +23,7 @@ int moves;
 
 char figures[2] = {'x','o'};
 
-char gridarr[ROW][COL];
+
 int ii;
 typedef struct
 {
@@ -36,19 +36,7 @@ winner_players  *rank;
 
 FILE *rank_file;
 
-typedef struct
-{
 
-    char gridArr[ROW][COL];
-
-    int score1;
-    int moves1;
-    int score2;
-    int moves2;
-
-} storeGrid;
-
-storeGrid grid;
 
 typedef struct
 {
@@ -70,8 +58,21 @@ playerData player1 = {0,0,0};
 playerData player2 = {0,0,1};
 
 
-void load_game()
+void load_game(int ROW,int  COL,char gridarr[ROW][COL])
 {
+    typedef struct
+{
+
+    char gridArr[ROW][COL];
+
+    int score1;
+    int moves1;
+    int score2;
+    int moves2;
+
+} storeGrid;
+
+storeGrid grid;
     _Bool playerIdentifer=0;
     int i,j,number_game;
     long long x;
@@ -138,8 +139,22 @@ void load_game()
 
 
 
-void save_game(char gridarr[ROW][COL],playerData player1,playerData  player2)
+void save_game(int ROW,int COL,char gridarr[ROW][COL],playerData player1,playerData  player2)
+
 {
+    typedef struct
+{
+
+    char gridArr[ROW][COL];
+
+    int score1;
+    int moves1;
+    int score2;
+    int moves2;
+
+} storeGrid;
+
+storeGrid grid;
     int i,j;
 
     FILE *address_file;
@@ -173,7 +188,7 @@ void save_game(char gridarr[ROW][COL],playerData player1,playerData  player2)
     fclose(address_file);
 
 }
-void chooseMenu ( int enteredColumn)
+void chooseMenu ( int ROW,int COL,char gridarr[ROW][COL],int enteredColumn)
 {
 
 
@@ -182,12 +197,12 @@ void chooseMenu ( int enteredColumn)
         if (!inLoadedGame) {
           if (moves>0)
             {
-                undo(&moves);
+                undo(ROW,COL,gridarr[ROW][COL],&moves);
             }
         }
         else {
             if (moves>1) {
-                undo(&moves);
+                undo(ROW,COL,gridarr[ROW][COL],&moves);
             }
         }
     }
@@ -195,7 +210,7 @@ void chooseMenu ( int enteredColumn)
     {
         if (moves<lastMove)
         {
-            redo(&moves);
+            redo(ROW,COL,gridarr[ROW][COL],&moves);
         }
     }
 
@@ -203,11 +218,11 @@ void chooseMenu ( int enteredColumn)
     else if(enteredColumn == 33)
     {
 
-        save_game(gridarr,player1,player2);
+        save_game(ROW,COL,gridarr,player1,player2);
     }
     else if(enteredColumn == 44)
     {
-        main_manu();
+        main_manu(gridarr[ROW][COL]);
     }
 
 }
@@ -226,14 +241,14 @@ void printMenu()
 }
 
 
-void updateUndoList (playerData playerMoved, int i, int j, int moveNumber)
+void updateUndoList (int ROW,int COL,char gridarr[ROW][COL],playerData playerMoved, int i, int j, int moveNumber)
 {
     undoList[moveNumber].i = i;
     undoList[moveNumber].j = j;
     undoList[moveNumber+2].movingPlayer = playerMoved;
 }
 
-void undo (int *move)
+void undo (char gridarr[ROW][COL],int *move)
 {
     gridarr[(undoList[*move-1]).i][(undoList[*move-1]).j] = '-';
     playerData *movedPlayer;
@@ -252,7 +267,7 @@ void undo (int *move)
     *move=*move - 1;
 }
 
-void redo (int *move)
+void redo (int ROW,int COL,char gridarr[ROW][COL],int *move)
 {
     gridarr[undoList[*move].i][undoList[*move].j] = undoList[*move].movingPlayer.identifier;
     playerData *movedPlayer;
@@ -297,7 +312,7 @@ void addMoves(playerData *player)
 
 
 
-int countHorizontally (_Bool counted, int i, int j)
+int countHorizontally (int ROW,int COL,char gridarr[ROW][COL],_Bool counted, int i, int j)
 {
     int sum = 0;
     if (j-3>=0)
@@ -332,7 +347,7 @@ int countHorizontally (_Bool counted, int i, int j)
 }
 
 //replace the number 9 with the hight variable of the grid
-int countVertically(_Bool counted,int i, int j)
+int countVertically(int ROW,int COL,char gridarr[ROW][COL],_Bool counted,int i, int j)
 {
     if (i+3<ROW)
     {
@@ -344,7 +359,7 @@ int countVertically(_Bool counted,int i, int j)
     }
 }
 
-int countDiagonally(_Bool counted, int i, int j)
+int countDiagonally(int ROW,int COL,char gridarr[ROW][COL],_Bool counted, int i, int j)
 {
     int sum = 0;
     //checks the main diagonal
@@ -408,14 +423,14 @@ int countDiagonally(_Bool counted, int i, int j)
     return sum;
 }
 
-void updateScore(playerData *player, int i, int j)
+void updateScore(int ROW,int COL,char gridarr[ROW][COL],playerData *player, int i, int j)
 {
-    player->score += countHorizontally(player->identifier,i,j) + countVertically(player->identifier,i,j) + countDiagonally(player->identifier,i,j);
+    player->score += countHorizontally(ROW,COL,gridarr,player->identifier,i,j) + countVertically(ROW,COL,gridarr,player->identifier,i,j) + countDiagonally(ROW,COL,gridarr,player->identifier,i,j);
 }
 
 
 
-void original_grid( char gridarr[ROW][COL])
+void original_grid(int ROW,int COL, char gridarr[ROW][COL])
 {
     int j,i;
     for(i=0; i<ROW; i++)
@@ -428,7 +443,7 @@ void original_grid( char gridarr[ROW][COL])
 }
 
 
-void print(char gridarr[ROW][COL])
+void print(int ROW,int COL,char gridarr[ROW][COL])
 {
     int j,i;
     for(i=1; i<=COL; i++)
@@ -479,7 +494,7 @@ void print(char gridarr[ROW][COL])
 }
 
 
-void putDisk(char gridarr[ROW][COL],int j,_Bool *identify,int *moves)
+void putDisk(int ROW,int COL,char gridarr[ROW][COL],int j,_Bool *identify,int *moves)
 {
     int i = ROW -1;
     while(1)
@@ -489,9 +504,9 @@ void putDisk(char gridarr[ROW][COL],int j,_Bool *identify,int *moves)
             if(*identify==0)
             {
                 gridarr[i][j]=0;
-                updateScore(&player1,i,j);
+                updateScore(ROW, COL,gridarr[ROW][COL],&player1,i,j);
                 addMoves(&player1);
-                updateUndoList(player1,i,j,*moves);
+                updateUndoList( ROW, COL,gridarr[ROW][COL],player1,i,j,*moves);
                 (*moves)++;
                 break;
             }
@@ -499,9 +514,9 @@ void putDisk(char gridarr[ROW][COL],int j,_Bool *identify,int *moves)
             else if(*identify==1)
             {
                 gridarr[i][j]=1;
-                updateScore(&player2,i,j);
+                updateScore(ROW, COL,gridarr,&player2,i,j);
                 addMoves(&player2);
-                updateUndoList(player2,i,j,*moves);
+                updateUndoList(ROW, COL,gridarr,player2,i,j,*moves);
                 (*moves)++;
                 break;
             }
@@ -513,12 +528,12 @@ void putDisk(char gridarr[ROW][COL],int j,_Bool *identify,int *moves)
     }
 }
 
-void play(char gridarr[ROW][COL],int *moves,_Bool *identify)
+void play(int ROW,int COL,char gridarr[ROW][COL],int *moves,_Bool *identify)
 {
     int enteredColumn;
     //clear console and update it with previous action
     system("cls");
-    print(gridarr);
+    print(ROW, COL,gridarr);
 
     //decide which player is about to play
     *identify = ((*moves)%2);
@@ -528,7 +543,7 @@ void play(char gridarr[ROW][COL],int *moves,_Bool *identify)
 
     if ((enteredColumn==11)||(enteredColumn==22)||(enteredColumn==33)||(enteredColumn==44))
     {
-        chooseMenu(enteredColumn);
+        chooseMenu(ROW,COL,gridarr,enteredColumn);
         return;
     }
     while(!(enteredColumn>0&&enteredColumn<=COL))
@@ -544,23 +559,23 @@ void play(char gridarr[ROW][COL],int *moves,_Bool *identify)
         scanf("%d",&enteredColumn);
     }
 
-    putDisk(gridarr,enteredColumn-1,identify,moves);
+    putDisk(ROW, COL,gridarr,enteredColumn-1,identify,moves);
     int *lastMovePlayed = &lastMove;
     *lastMovePlayed = *moves;
 }
-void new_game()
+void new_game(int ROW,int COL,char gridarr[ROW][COL])
 {
     lastMove=0;
     moves=0;
-    original_grid(gridarr);
+    original_grid(ROW, COL,gridarr);
     player1.moves = 0;
     player1.score = 0;
     player2.moves = 0;
     player2.score = 0;
 
-    play(gridarr,&moves,&playerIdentifer);
+    play(ROW,COL,gridarr,&moves,&playerIdentifer);
 }
-void load_player( )
+void load_player(int ROW,int COL,char gridarr[ROW][COL] )
 {
 
     while(1)
@@ -569,7 +584,7 @@ void load_player( )
         if((player1.moves+player2.moves)==(COL*ROW))
         {
             system("cls");
-            print(gridarr);
+            print(ROW, COL,gridarr);
             printf("game end\n");
             //deleted xx = 1 and replaced first parameter with 1 instead of xx
             top_rank(1,player1.score,player2.score);
@@ -580,17 +595,18 @@ void load_player( )
             if(choose==1)
             {
                 main_manu();
+                return;
             }
             else if(choose==2)
             {
                 return;
             }
         }
-        play(gridarr,&moves,&playerIdentifer);
+        play(ROW,COL,gridarr,&moves,&playerIdentifer);
     }
 
 }
-void main_manu()
+void main_manu(int ROW,int COL,char gridarr[ROW][COL])
 {
 
     char choose_manu;
@@ -614,20 +630,34 @@ void main_manu()
     if(choose_manu==49)
     {
         inLoadedGame = 0;
-        new_game();
-        load_player( );
+        new_game(ROW,COL,gridarr);
+        load_player(ROW,COL,gridarr);
 
     }
     if(choose_manu==50)
     {
 
-        load_game();
+        load_game(ROW,COL,gridarr);
 
     }
     if(choose_manu==51)
     {
         int xx=0;
+
         top_rank(xx,player1.score,player2.score);
+        printf("    1->main.\n");
+        printf("    2->exit.\n");
+        scanf("%d",&choose);
+         if(choose==1)
+            {
+                main_manu(ROW,COL,gridarr);
+                return;
+            }
+            else if(choose==2)
+            {
+                return;
+            }
+
 
     }
     if(choose_manu==52)
@@ -642,12 +672,15 @@ void main_manu()
 int main()
 {
 
+    int ROW=4,COL=4;
+    char gridArr[ROW][COL];
+
     lastMove=0;
     moves=0;
-    original_grid(gridarr);
+    original_grid(ROW,COL,gridArr);
     start_time=clock();
 
-    main_manu();
+    main_manu(ROW,COL,gridArr);
 
     return 0;
 }
