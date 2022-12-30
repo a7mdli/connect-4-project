@@ -57,203 +57,6 @@ time_t start_time;
 char figures[2] = {'x','o'};
 
 
-
-
-
-/*
-int load_game(int ROW,int COL,char gridarr[ROW][COL],gameInfo undoList[])
-{
-
-    _Bool playerIdentifer=0;
-    int i,j,return_value=0,number_game;
-    long int  x,size;
-
-
-    FILE*address_file;
-    address_file=fopen("st.bin","rb");
-    fseek(address_file,0,SEEK_END);
-    size=ftell(address_file);
-    size=(size)/(sizeof(storeGrid));
-    printf("%ld",size);
-
-
-    printf("    ->Enter place that your stored in it :\n");
-    printf("    ->GAME NUMBER ONE .\n");
-    printf("    ->GAME NUMBER TWO .\n");
-    printf("    ->GAME NUMBER THREE .\n");
-    scanf("%d",&number_game);
-
-   if(number_game>size){
-
-    printf("    this game not existed \n");
-    return_value=1;
-    return return_value;
-   }
-
-    while((number_game!=3)&&(number_game!=1)&&(number_game!=2))
-    {
-        printf("number between 1:3 :\n");
-        scanf("%d",&number_game);
-
-    }
-
-    for(i=1; i<=3; i++)
-    {
-
-        if(i==number_game)
-        {
-            x =sizeof(storeGrid)*(number_game-1);
-            fseek(address_file,x,SEEK_SET);
-            fread(&grid, sizeof(storeGrid), 1, address_file);
-        }
-    }
-
-
-    for(i=0; i<ROW; i++)
-    {
-        for(j=0; j<COL; j++)
-        {
-            gridarr[i][j]=grid.gridArr[i][j];
-        }
-    }
-    player1.score=grid.score1;
-    player1.moves=grid.moves1;
-
-    player2.score=grid.score2;
-    player2.moves=grid.moves2;
-
-     if (grid.moves1<=grid.moves2) {
-        moves = 0;
-        lastMove = 0;
-        inLoadedGame = 0;
-    }
-    else {
-        moves = 1;
-        lastMove = 1;
-        inLoadedGame = 1;
-    }
-
-
-    undoList[0].movingPlayer = player1;
-    undoList[1].movingPlayer = player2;
-    undoList[2].movingPlayer = player1;
-
-    fclose(address_file);
-
-    system("cls");
-
-
-    return return_value;
-}
-
-void save_game(int ROW,int COL,char gridarr[ROW][COL],playerData player1,playerData  player2,gameInfo undoList[])
-{
-     typedef struct
-{
-
-    char gridArr[ROW][COL];
-
-    int score1;
-    int moves1;
-    int score2;
-    int moves2;
-
-} storeGrid;
-storeGrid *save_games;
-
-storeGrid grid;
-
-    int i,j,chooseSaveOR;
-    long int size;
-
-    FILE *address_file;
-
-
-
-
-    address_file=fopen("st.bin","ab");
-
-    if(address_file==NULL)
-    {
-
-        printf("not find file");
-
-    }
-
-    for(i=0; i<ROW; i++)
-    {
-        for(j=0; j<COL; j++)
-        {
-            grid.gridArr[i][j]=gridarr[i][j];
-        }
-    }
-    grid.score1= player1.score;
-    grid.moves1=player1.moves;
-    grid.score2=player2.score;
-    grid.moves2= player2.moves;
-
-    fwrite(&grid, sizeof(storeGrid), 1, address_file);
-    fclose(address_file);
-    address_file=fopen("st.bin","rb ");
-    fseek(address_file,0,SEEK_END);
-    size=ftell(address_file);
-    size=(size)/(sizeof(storeGrid));
-
-    if(size>3){
-
-        printf("the storage of the game is FULL\n");
-        printf("IF YOU WANT TO DELETE THE FIRST GAME AND STORE YOUR GAME  PRESS 1\n");
-        printf("IF NOT PRESS  2\n");
-
-
-        scanf("%d",&chooseSaveOR);
-
-          if(chooseSaveOR==1){
-                  save_games=malloc(sizeof(storeGrid)*3);
-                   fseek(address_file,-3*sizeof(storeGrid),SEEK_END);
-                     fread(save_games,sizeof(storeGrid),3,address_file);
-                      fclose(address_file);
-
-                       address_file=fopen("st.bin","wb");
-                       fwrite(save_games, sizeof(storeGrid),3, address_file);
-                       fclose(address_file);
-                       free(save_games);
-
-
-                 load_player(ROW,COL,gridarr,undoList);
-                return;
-       }
-
-        else if(chooseSaveOR==2){
-                 load_player(ROW,COL,gridarr,undoList);
-
-                return;
-       }
-    }
-
-
-
-     if((size<=3)&&(size>=1)){
-     save_games=malloc(sizeof(storeGrid)*size);
-     }
-
-
-
-
-
-    fseek(address_file,0,SEEK_SET);
-    fread(save_games,sizeof(storeGrid),size,address_file);
-    fclose(address_file);
-
-
-
-    address_file=fopen("st.bin","wb");
-    fwrite(save_games, sizeof(storeGrid),size, address_file);
-    fclose(address_file);
-    free(save_games);
-
-}*/
-
 void chooseMenu ( int ROW,int COL,char gridarr[ROW][COL],int enteredColumn,gameInfo undoList[])
 {
 
@@ -590,6 +393,7 @@ void putDisk(int ROW,int COL,char gridarr[ROW][COL],int j,_Bool *identify,int *m
 
 void play(int ROW,int COL,char gridarr[ROW][COL],int *moves,_Bool *identify, gameInfo undoList[])
 {
+    int check_char;
     int enteredColumn;
     //clear console and update it with previous action
     system("cls");
@@ -599,17 +403,36 @@ void play(int ROW,int COL,char gridarr[ROW][COL],int *moves,_Bool *identify, gam
     *identify = ((*moves)%2);
 
     printf("\n\tplayer %d your turn now :\n\t",*identify+1);
-    scanf("%d",&enteredColumn);
+   while(1)
+    {
+        beging:
+
+         check_char=scanf("%d",&enteredColumn);
+         if(check_char!=1){
+         gets(&enteredColumn);
+
+          printf("enter valid columns between 1:%d:\n",COL);
+
+
+         }
+
+         else if(!(enteredColumn>0&&enteredColumn<=COL)){
+            printf("enter valid columns between 1:%d:\n",COL);
+            goto beging;
+
+         }
+         else{
+
+            break;
+         }
+
+
+    }
 
     if ((enteredColumn==11)||(enteredColumn==22)||(enteredColumn==33)||(enteredColumn==44))
     {
         chooseMenu(ROW,COL,gridarr,enteredColumn,undoList);
         return;
-    }
-    while(!(enteredColumn>0&&enteredColumn<=COL))
-    {
-        printf("enter valid columns between 1:%d:\n",COL);
-        scanf("%d",&enteredColumn);
     }
 
     while(gridarr[0][enteredColumn-1]!='-')
@@ -636,7 +459,7 @@ void new_game(int ROW,int COL,char gridarr[ROW][COL],gameInfo undoList[])
 }
 void load_player(int ROW,int COL,char gridarr[ROW][COL], gameInfo undoList[])
 {
-
+int check_char;
     while(1)
     {
 
@@ -644,12 +467,36 @@ void load_player(int ROW,int COL,char gridarr[ROW][COL], gameInfo undoList[])
         {
             system("cls");
             print(ROW, COL,gridarr);
-            printf("game end\n");
+            printf("    game end\n");
             //deleted xx = 1 and replaced first parameter with 1 instead of xx
             top_rank(1,player1.score,player2.score);
             printf("    1->main.\n");
             printf("    2->exit.\n");
-            scanf("%d",&choose);
+              while(1)
+    {
+        beging:
+
+         check_char=scanf("%d",&choose);
+         if(check_char!=1){
+         gets(&choose);
+
+          printf("enter valid columns between 1:2:\n");
+
+
+         }
+
+         else if(!(choose>0&&choose<=2)){
+            printf("enter valid columns between 1:2:\n");
+            goto beging;
+
+         }
+         else{
+
+            break;
+         }
+
+
+    }
 
             if(choose==1)
             {
@@ -657,7 +504,7 @@ void load_player(int ROW,int COL,char gridarr[ROW][COL], gameInfo undoList[])
                 return;
             }
             else if(choose==2)
-            {l
+            {
                 return;
             }
         }
