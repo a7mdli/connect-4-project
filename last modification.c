@@ -8,7 +8,7 @@
 #include <windows.h>
 #include <time.h>
 #include <conio.h>
-//#include "parseXML.h"
+#include "parseXML.h"
 //#define ROW 4
 //#define COL 4
 
@@ -52,13 +52,11 @@ typedef struct
     playerData movingPlayer;
 } gameInfo;
 
-gameInfo undoList[ROW*COL+2] = {{0,0,{0,0,0}},{0,0,{0,0,1}}};
-
 playerData player1 = {0,0,0};
 playerData player2 = {0,0,1};
 
 
-void load_game(int ROW,int  COL,char gridarr[ROW][COL])
+void load_game(int ROW,int COL,char gridarr[ROW][COL],gameInfo undoList[])
 {
     typedef struct
 {
@@ -72,7 +70,7 @@ void load_game(int ROW,int  COL,char gridarr[ROW][COL])
 
 } storeGrid;
 
-storeGrid grid;
+    storeGrid grid;
     _Bool playerIdentifer=0;
     int i,j,number_game;
     long long x;
@@ -133,8 +131,7 @@ storeGrid grid;
     fclose(address_file);
 
     system("cls");
-
-    load_player();
+    load_player(ROW,COL,gridarr,undoList);
 }
 
 
@@ -188,7 +185,7 @@ storeGrid grid;
     fclose(address_file);
 
 }
-void chooseMenu ( int ROW,int COL,char gridarr[ROW][COL],int enteredColumn)
+void chooseMenu ( int ROW,int COL,char gridarr[ROW][COL],int enteredColumn,gameInfo undoList[])
 {
 
 
@@ -197,12 +194,12 @@ void chooseMenu ( int ROW,int COL,char gridarr[ROW][COL],int enteredColumn)
         if (!inLoadedGame) {
           if (moves>0)
             {
-                undo(ROW,COL,gridarr[ROW][COL],&moves);
+                undo(ROW,COL,gridarr,&moves,undoList);
             }
         }
         else {
             if (moves>1) {
-                undo(ROW,COL,gridarr[ROW][COL],&moves);
+                undo(ROW,COL,gridarr,&moves,undoList);
             }
         }
     }
@@ -210,7 +207,7 @@ void chooseMenu ( int ROW,int COL,char gridarr[ROW][COL],int enteredColumn)
     {
         if (moves<lastMove)
         {
-            redo(ROW,COL,gridarr[ROW][COL],&moves);
+            redo(ROW,COL,gridarr,&moves,undoList);
         }
     }
 
@@ -222,33 +219,27 @@ void chooseMenu ( int ROW,int COL,char gridarr[ROW][COL],int enteredColumn)
     }
     else if(enteredColumn == 44)
     {
-        main_manu(gridarr[ROW][COL]);
+        main_manu(ROW,COL,gridarr);
     }
 
 }
 void printMenu()
 {
-
-
     printf("Enter 1 to undo press 11\n");
     printf("Enter 2 to redo press 22\n");
     printf("Enter 3 to save press 33\n");
     printf("Enter 4 to exit prss 44\n");
-
-
-
-
 }
 
 
-void updateUndoList (int ROW,int COL,char gridarr[ROW][COL],playerData playerMoved, int i, int j, int moveNumber)
+void updateUndoList (int ROW,int COL,char gridarr[ROW][COL],playerData playerMoved, int i, int j, int moveNumber,gameInfo undoList[])
 {
     undoList[moveNumber].i = i;
     undoList[moveNumber].j = j;
     undoList[moveNumber+2].movingPlayer = playerMoved;
 }
 
-void undo (char gridarr[ROW][COL],int *move)
+void undo (int ROW, int COL, char gridarr[ROW][COL],int *move, gameInfo undoList[])
 {
     gridarr[(undoList[*move-1]).i][(undoList[*move-1]).j] = '-';
     playerData *movedPlayer;
@@ -267,7 +258,7 @@ void undo (char gridarr[ROW][COL],int *move)
     *move=*move - 1;
 }
 
-void redo (int ROW,int COL,char gridarr[ROW][COL],int *move)
+void redo (int ROW,int COL,char gridarr[ROW][COL],int *move, gameInfo undoList[])
 {
     gridarr[undoList[*move].i][undoList[*move].j] = undoList[*move].movingPlayer.identifier;
     playerData *movedPlayer;
@@ -494,7 +485,7 @@ void print(int ROW,int COL,char gridarr[ROW][COL])
 }
 
 
-void putDisk(int ROW,int COL,char gridarr[ROW][COL],int j,_Bool *identify,int *moves)
+void putDisk(int ROW,int COL,char gridarr[ROW][COL],int j,_Bool *identify,int *moves, gameInfo undoList[])
 {
     int i = ROW -1;
     while(1)
@@ -504,9 +495,9 @@ void putDisk(int ROW,int COL,char gridarr[ROW][COL],int j,_Bool *identify,int *m
             if(*identify==0)
             {
                 gridarr[i][j]=0;
-                updateScore(ROW, COL,gridarr[ROW][COL],&player1,i,j);
+                updateScore(ROW, COL,gridarr,&player1,i,j);
                 addMoves(&player1);
-                updateUndoList( ROW, COL,gridarr[ROW][COL],player1,i,j,*moves);
+                updateUndoList( ROW, COL,gridarr,player1,i,j,*moves,undoList);
                 (*moves)++;
                 break;
             }
@@ -516,7 +507,7 @@ void putDisk(int ROW,int COL,char gridarr[ROW][COL],int j,_Bool *identify,int *m
                 gridarr[i][j]=1;
                 updateScore(ROW, COL,gridarr,&player2,i,j);
                 addMoves(&player2);
-                updateUndoList(ROW, COL,gridarr,player2,i,j,*moves);
+                updateUndoList(ROW, COL,gridarr,player2,i,j,*moves,undoList);
                 (*moves)++;
                 break;
             }
@@ -528,7 +519,7 @@ void putDisk(int ROW,int COL,char gridarr[ROW][COL],int j,_Bool *identify,int *m
     }
 }
 
-void play(int ROW,int COL,char gridarr[ROW][COL],int *moves,_Bool *identify)
+void play(int ROW,int COL,char gridarr[ROW][COL],int *moves,_Bool *identify, gameInfo undoList[])
 {
     int enteredColumn;
     //clear console and update it with previous action
@@ -543,14 +534,13 @@ void play(int ROW,int COL,char gridarr[ROW][COL],int *moves,_Bool *identify)
 
     if ((enteredColumn==11)||(enteredColumn==22)||(enteredColumn==33)||(enteredColumn==44))
     {
-        chooseMenu(ROW,COL,gridarr,enteredColumn);
+        chooseMenu(ROW,COL,gridarr,enteredColumn,undoList);
         return;
     }
     while(!(enteredColumn>0&&enteredColumn<=COL))
     {
         printf("enter valid columns between 1:%d:\n",COL);
         scanf("%d",&enteredColumn);
-
     }
 
     while(gridarr[0][enteredColumn-1]!='-')
@@ -559,11 +549,11 @@ void play(int ROW,int COL,char gridarr[ROW][COL],int *moves,_Bool *identify)
         scanf("%d",&enteredColumn);
     }
 
-    putDisk(ROW, COL,gridarr,enteredColumn-1,identify,moves);
+    putDisk(ROW, COL,gridarr,enteredColumn-1,identify,moves,undoList);
     int *lastMovePlayed = &lastMove;
     *lastMovePlayed = *moves;
 }
-void new_game(int ROW,int COL,char gridarr[ROW][COL])
+void new_game(int ROW,int COL,char gridarr[ROW][COL],gameInfo undoList[])
 {
     lastMove=0;
     moves=0;
@@ -573,9 +563,9 @@ void new_game(int ROW,int COL,char gridarr[ROW][COL])
     player2.moves = 0;
     player2.score = 0;
 
-    play(ROW,COL,gridarr,&moves,&playerIdentifer);
+    play(ROW,COL,gridarr,&moves,&playerIdentifer,undoList);
 }
-void load_player(int ROW,int COL,char gridarr[ROW][COL] )
+void load_player(int ROW,int COL,char gridarr[ROW][COL], gameInfo undoList[])
 {
 
     while(1)
@@ -594,7 +584,7 @@ void load_player(int ROW,int COL,char gridarr[ROW][COL] )
 
             if(choose==1)
             {
-                main_manu();
+                main_manu(ROW,COL,gridarr);
                 return;
             }
             else if(choose==2)
@@ -602,12 +592,24 @@ void load_player(int ROW,int COL,char gridarr[ROW][COL] )
                 return;
             }
         }
-        play(ROW,COL,gridarr,&moves,&playerIdentifer);
+        play(ROW,COL,gridarr,&moves,&playerIdentifer,undoList);
     }
 
 }
 void main_manu(int ROW,int COL,char gridarr[ROW][COL])
 {
+    gameInfo undoList[ROW*COL+2]; //= {{0,0,{0,0,0}},{0,0,{0,0,1}}};
+    //initializing undo list
+    undoList[0].i=0;
+    undoList[0].j=0;
+    undoList[0].movingPlayer.identifier=0;
+    undoList[0].movingPlayer.moves=0;
+    undoList[0].movingPlayer.score=0;
+    undoList[1].i=0;
+    undoList[1].j=0;
+    undoList[1].movingPlayer.identifier=1;
+    undoList[1].movingPlayer.moves=0;
+    undoList[1].movingPlayer.score=0;
 
     char choose_manu;
 
@@ -630,14 +632,14 @@ void main_manu(int ROW,int COL,char gridarr[ROW][COL])
     if(choose_manu==49)
     {
         inLoadedGame = 0;
-        new_game(ROW,COL,gridarr);
-        load_player(ROW,COL,gridarr);
+        new_game(ROW,COL,gridarr,undoList);
+        load_player(ROW,COL,gridarr,undoList);
 
     }
     if(choose_manu==50)
     {
 
-        load_game(ROW,COL,gridarr);
+        load_game(ROW,COL,gridarr,undoList);
 
     }
     if(choose_manu==51)
@@ -672,8 +674,18 @@ void main_manu(int ROW,int COL,char gridarr[ROW][COL])
 int main()
 {
 
-    int ROW=4,COL=4;
+    int ROW=9,COL=7,highScores=10;
     char gridArr[ROW][COL];
+    char configFilePath[1000] = "configure.xml";
+
+    for (int i=0; i<3; i++) {
+        _Bool recieved = readParametars(&COL,&ROW,&highScores,configFilePath);
+        if (recieved) break;
+        else {
+            printf("Configuration file is corrupted or doesn't exist, please enter a path for a valid file\n");
+            gets(configFilePath);
+        }
+    }
 
     lastMove=0;
     moves=0;
@@ -684,4 +696,3 @@ int main()
 
     return 0;
 }
-
