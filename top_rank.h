@@ -13,13 +13,15 @@ typedef struct
     int moves;
     _Bool identifier;
 } Data  ;
-         Data    player11;
-         Data     player22;
+Data    player11;
+Data     player22;
 FILE *rank_file;
+int noOne_win=0;
 int choose_best(int g, long int  size,ply  *rank);
 int  check(int i,long int size,ply *rank);
 void top_rank(int yy,int score1,int score2);
-
+void top_players(int yy,int score1,int score2);
+void display_toPrank(long int size,ply *rank);
 
 
 
@@ -68,7 +70,7 @@ int check(int i,long int  size,ply *rank)
         }
         else
         {
-           define=0;
+            define=0;
 
             return 0;
 
@@ -77,9 +79,10 @@ int check(int i,long int  size,ply *rank)
 
 
     }
-    if(define==1){
-       ii=i;
-         printf("%d",i);
+    if(define==1)
+    {
+        ii=i;
+        printf("%d",i);
         return 1;
 
     }
@@ -89,67 +92,62 @@ int check(int i,long int  size,ply *rank)
 }
 
 
- int choose_best(int g,long int  size,ply  *rank){
+int choose_best(int g,long int  size,ply  *rank)
+{
 
- ply  ranke;
+    ply  ranke;
 
 
 
-if(rank[g-1].score>=rank[size-1].score){
+    if(rank[g-1].score>=rank[size-1].score)
+    {
 
         rank_file=fopen("rank.bin","wb");
 
-      fwrite(rank,sizeof(ply),size-1,rank_file);
-       fclose(rank_file);
-      return 1;
+        fwrite(rank,sizeof(ply),size-1,rank_file);
+        fclose(rank_file);
+        return 1;
 
-}
-
-
-else if(rank[g-1].score<rank[size-1].score){
+    }
 
 
-   rank[g-1].score=rank[size-1].score;
-    rank[g-1].moves=rank[size-1].moves;
-
-
-
-   if(g!=1){
-    while(rank[g-1].score>=rank[g-2].score)
+    else if(rank[g-1].score<rank[size-1].score)
     {
-        ranke=rank[g-1];
-        rank[g-1]=rank[g-2];
-        rank[g-2]=ranke;
 
-        g--;
-        if(g==1)
+
+        rank[g-1].score=rank[size-1].score;
+        rank[g-1].moves=rank[size-1].moves;
+
+
+
+        if(g!=1)
         {
-            break;
+            while(rank[g-1].score>=rank[g-2].score)
+            {
+                ranke=rank[g-1];
+                rank[g-1]=rank[g-2];
+                rank[g-2]=ranke;
+
+                g--;
+                if(g==1)
+                {
+                    break;
+                }
+            }
         }
-    }
-   }
 
-    rank_file=fopen("rank.bin","wb");
+        rank_file=fopen("rank.bin","wb");
 
-      fwrite(rank,sizeof(ply),size-1,rank_file);
-       fclose(rank_file);
-      return 1;
+        fwrite(rank,sizeof(ply),size-1,rank_file);
+        fclose(rank_file);
+        return 1;
     }
 }
-void top_rank(int yy,int score1,int score2)
+void top_players(int yy,int score1,int score2)
 {
-    player22.score=score2;
-   player11.score=score1;
-    ply  *rank;
-    int determin ;
-    ply  ranke;
 
-    int x,dd=2;
-    unsigned  long  i;
     char namee[100];
-    int scores,moves,number_structure,control;
-
-
+    ply  ranke;
     if(player11.score>player22.score)
     {
 
@@ -160,9 +158,9 @@ void top_rank(int yy,int score1,int score2)
         strcpy(ranke.name,namee);
         ranke.score= player11.score;
         ranke.moves= player11.moves;
-         rank_file=fopen("rank.bin","ab");
-    fwrite(&ranke,sizeof(ply),1,rank_file);
-    fclose(rank_file);
+        rank_file=fopen("rank.bin","ab");
+        fwrite(&ranke,sizeof(ply),1,rank_file);
+        fclose(rank_file);
 
     }
     else if(player22.score>player11.score)
@@ -175,16 +173,82 @@ void top_rank(int yy,int score1,int score2)
         strcpy(ranke.name,namee);
         ranke.score= player22.score;
         ranke.moves= player22.moves;
-         rank_file=fopen("rank.bin","ab");
+        rank_file=fopen("rank.bin","ab");
         fwrite(&ranke,sizeof(ply),1,rank_file);
-      fclose(rank_file);
+        fclose(rank_file);
 
     }
     else if((yy!=0)&&(player22.score==player11.score))
     {
         printf("-------------------no one win game--------------------------\n");
+        noOne_win=1;
+        return;
 
     }
+
+
+}
+void display_toPrank(long int size,ply *rank)
+{
+    int i;
+    rank_file=fopen("rank.bin","rb");
+    rank=malloc(sizeof(ply)*(size));
+    fread(rank,sizeof(ply),size,rank_file);
+
+    for(i=0; i<size ; i++)
+    {
+
+
+        printf("score of structure: %d\n",rank[i].score);
+
+        printf("name of structure: %s",rank[i].name);
+
+        printf("moves of structure: %d\n",rank[i].moves);
+
+        printf("------------------------------------\n");
+
+    }
+
+    free(rank);
+
+
+
+
+
+    fclose(rank_file);
+
+
+
+}
+void top_rank(int yy,int score1,int score2)
+{
+    player22.score=score2;
+    player11.score=score1;
+    ply  *rank;
+    int determin ;
+    ply  ranke;
+
+    int x,dd=2;
+    unsigned  long  i;
+
+
+
+    if(yy==0)
+    {
+        int scores,moves,number_structure,control;
+        rank_file=fopen("rank.bin","rb");
+        fseek(rank_file,0L,SEEK_END);
+        long int size=ftell(rank_file);
+        //  size=number_of_ply();
+        size=(size)/sizeof(ply);
+
+
+        display_toPrank(size,rank);
+        return;
+
+
+    }
+    top_players(yy,player11.score,player22.score);
 
 
     //the end position if file
@@ -259,41 +323,20 @@ void top_rank(int yy,int score1,int score2)
             }
 
         }
-
-
         rank_file=fopen("rank.bin","wb");
         fwrite(rank,sizeof(ply),size,rank_file);
         fclose(rank_file);
-
     }
-        free(rank);
-        rank_file=fopen("rank.bin","rb");
-        rank=malloc(sizeof(ply)*(size));
-        fread(rank,sizeof(ply),size,rank_file);
-
-      for(i=0; i<size ; i++)
-    {
-
-
-        printf("score of structure: %d\n",rank[i].score);
-
-        printf("name of structure: %s",rank[i].name);
-
-        printf("moves of structure: %d\n",rank[i].moves);
-
-        printf("------------------------------------\n");
-
-    }
-
     free(rank);
+    if(noOne_win==0)
+    {
+        if(dd==1){
+           display_toPrank(size-1,rank);
+        }
+        if(dd=0){
 
+        display_toPrank(size,rank);
 
-
-
-
-    fclose(rank_file);
-
-
-
-
+        }
+    }
 }
