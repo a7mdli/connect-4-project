@@ -1,29 +1,3 @@
-#include <stdio.h>
-
-
-
-//#include "undo_redo.h"
-#include <sys/types.h>
-#include <unistd.h>
-
-#include <stdbool.h>
-#include "top_rank.h"
-#include <stdlib.h>
-#include <windows.h>
-#include <time.h>
-#include <conio.h>
-#define ROW 4
-#define COL 4
-_Bool playerIdentifer=0;
-time_t start_time;
-
-int lastMove;
-int choose;
-int moves;
-
-char figures[2] = {'x','o'};
-
-char gridarr[ROW][COL];
 int ii;
 typedef struct
 {
@@ -34,21 +8,6 @@ typedef struct
 } winner_players ;
 winner_players  *rank;
 
-FILE *rank_file;
-
-typedef struct
-{
-
-    char gridArr[ROW][COL];
-
-    int score1;
-    int moves1;
-    int score2;
-    int moves2;
-
-} storeGrid;
-
-storeGrid grid;
 
 typedef struct
 {
@@ -64,343 +23,88 @@ typedef struct
     playerData movingPlayer;
 } gameInfo;
 
-gameInfo undoList[ROW*COL+2] = {{0,0,{0,0,0}},{0,0,{0,0,1}}};
-
 playerData player1 = {0,0,0};
 playerData player2 = {0,0,1};
-///////////////////////////////////////////////////////########################
-/*int choose_best(int g,unsigned long size){
 
- winner_players  ranke;
-
-
-
-if(rank[g-1].score>=rank[size-1].score){
-        rank_file=fopen("rank.bin","wb");
-
-      fwrite(rank,sizeof(winner_players),size-1,rank_file);
-      fclose(rank_file);
-      return 1;
-
-}
+int lastMove;
+int choose;
+int moves;
+_Bool inLoadedGame = 0;
 
 
-else if(rank[g-1].score<rank[size-1].score){
+#include <stdio.h>
+FILE *rank_file;
+//#include "undo_redo.h"
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdbool.h>
+#include "top_rank.h"
+#include <stdlib.h>
+#include <windows.h>
+#include <time.h>
+#include <conio.h>
+#include "parseXML.h"
+#include "load_save.h"
+//#define ROW 4
+//#define COL 4
 
-
-   rank[g-1].score=rank[size-1].score;
-    rank[g-1].moves=rank[size-1].moves;
-
-
-
-   if(g!=1){
-    while(rank[g-1].score>=rank[g-2].score)
-    {
-        ranke=rank[g-1];
-        rank[g-1]=rank[g-2];
-        rank[g-2]=ranke;
-
-        g--;
-        if(g==1)
-        {
-            break;
-        }
-    }
-   }
-
-    rank_file=fopen("rank.bin","wb");
-
-      fwrite(rank,sizeof(winner_players),size-1,rank_file);
-       fclose(rank_file);
-      return 1;
-    }
-}
- int  check(int i,unsigned long size)
-{
-    int define=1;
-    char ch;
-    int ctr1=0,ctr2=0;
-
-    while((rank[i-1].name[ctr2]!='\0')&&(rank[size-1].name[ctr1]!='\0'))
-    {
-
-
-        while(isspace(rank[size-1].name[ctr1]))
-        {
-
-            ctr1++;
-
-        }
-        while(isspace(rank[i-1].name[ctr2]))
-        {
-
-            ctr2++;
-
-        }
-
-        if(isupper(rank[size-1].name[ctr1]))
-        {
-            ch=tolower(rank[size-1].name[ctr1]);
-
-        }
-        else if(islower(rank[size-1].name[ctr1]))
-        {
-
-
-            ch=toupper(rank[size-1].name[ctr1]);
-
-        }
+_Bool playerIdentifer=0;
+time_t start_time;
 
 
 
-        if((rank[i-1].name[ctr2]==ch)||(rank[i-1].name[ctr2]==rank[size-1].name[ctr1]))
-        {
-            ctr1++;
-            ctr2++;
-        }
-        else
-        {
-           define=0;
 
-            return 0;
-
-        }
+char figures[2] = {'x','o'};
 
 
 
-    }
-    if(define==1){
-       ii=i;
-         printf("%d",i);
-        return 1;
-
-    }
 
 
-
-}*/
-/*void diplay_topRank(long int size)
+/*
+int load_game(int ROW,int COL,char gridarr[ROW][COL],gameInfo undoList[])
 {
 
-    int i;
-
-
-}
-
-void top_rank(int yy)
-{
-    int determin ;
-    winner_players  ranke;
-
-    int x,dd=2;
-    unsigned  long  i;
-    char namee[100];
-    int scores,moves,number_structure,control;
-
-
-    if(player1.score>player2.score)
-    {
-
-        printf("-------------------player1 win-----------------\n");
-        printf("enter name your name player 1:\n");
-        fscanf(stdin, " ");
-        fgets(namee,100,stdin);
-        strcpy(ranke.name,namee);
-        ranke.score= player1.score;
-        ranke.moves= player1.moves;
-         rank_file=fopen("rank.bin","ab");
-    fwrite(&ranke,sizeof(winner_players),1,rank_file);
-    fclose(rank_file);
-
-    }
-    else if(player2.score>player1.score)
-    {
-
-        printf("-------------------player2 win-----------------");
-        printf("enter name your name player 1:\n");
-        fscanf(stdin, " ");
-        fgets(namee,100,stdin);
-        strcpy(ranke.name,namee);
-        ranke.score= player2.score;
-        ranke.moves= player2.moves;
-         rank_file=fopen("rank.bin","ab");
-        fwrite(&ranke,sizeof(winner_players),1,rank_file);
-      fclose(rank_file);
-
-    }
-    else if((yy!=0)&&(player2.score==player1.score))
-    {
-        printf("-------------------no one win game--------------------------\n");
-
-    }
-
-
-    //the end position if file
-    rank_file=fopen("rank.bin","rb");
-    fseek(rank_file,0L,SEEK_END);
-    long int size=ftell(rank_file);
-    //  size=number_of_winner_players();
-    size=(size)/sizeof(winner_players);
-
-    rank=malloc(sizeof(winner_players)*size);
-    fseek(rank_file,0,SEEK_SET);
-    fread(rank,sizeof(winner_players),size,rank_file);
-
-    fclose(rank_file);
-
-    i=size-1;
-    if((size!=1)&&(yy!=0))
-    {
-
-        while(i>0)
-        {
-            //x=check(i,size);
-
-            x=check(i,size,rank);
-
-            if(x==1)
-
-
-            {
-
-                dd=choose_best(ii,size,rank);
-
-                //dd=choose_best(ii,size);
-                printf("tttttttttttttttttt\n");
-                break;
-            }
-            if((i-1)==0)
-            {
-                dd=0;
-                printf("ffffffffffffffffffff\n");
-
-                break;
-            }
-
-
-            i--;
-
-
-        }
-
-    }
-
-
-
-    i=size-1;
-
-
-    if((size!=1)&&(dd==0))
-    {
-        while(rank[i].score>=rank[i-1].score)
-        {
-
-            ranke=rank[i];
-            rank[i]=rank[i-1];
-            rank[i-1]= ranke;
-
-            i--;
-            if(i==0)
-            {
-
-                break;
-            }
-
-        }
-
-
-        rank_file=fopen("rank.bin","wb");
-        fwrite(rank,sizeof(winner_players),size,rank_file);
-        fclose(rank_file);
-
-    }
-        free(rank);
-        rank_file=fopen("rank.bin","rb");
-        rank=malloc(sizeof(winner_players)*(size));
-        fread(rank,sizeof(winner_players),size,rank_file);
-
-      for(i=0; i<size ; i++)
-    {
-
-
-        printf("score of structure: %d\n",rank[i].score);
-
-        printf("name of structure: %s",rank[i].name);
-
-        printf("moves of structure: %d\n",rank[i].moves);
-
-        printf("------------------------------------\n");
-
-    }
-
-    free(rank);
-
-
-
-
-    /*if(dd==1)
-    {
-        size=size-1;
-
-        printf("1<-display top ranks\n");
-        scanf("%d",&determin);
-        if(determin==1)
-        {
-            diplay_topRank(size);
-        }
-
-    }
-
-
-    else
-    {
-         printf("eeeeeeeeeeeeeeeeeeeeeee");
-        printf("1<-display top ranks\n");
-        scanf("%d",&determin);
-         rank=malloc(sizeof(winner_players)*(size));
-        fread(rank,sizeof(winner_players),size,rank_file);
-        if(determin==1)
-        {
-            diplay_topRank(size);
-        }
-
-
-    }
-
-    fclose(rank_file);
-
-
-    return 0;
-
-
-}*/
-
-void load_game()
-{
     _Bool playerIdentifer=0;
-    int i,j,number_game;
-    long long x;
+    int i,j,return_value=0,number_game;
+    long int  x,size;
+
+
     FILE*address_file;
     address_file=fopen("st.bin","rb");
+    fseek(address_file,0,SEEK_END);
+    size=ftell(address_file);
+    size=(size)/(sizeof(storeGrid));
+    printf("%ld",size);
 
 
-    printf("enter number game you stored:\n",number_game);
-
+    printf("    ->Enter place that your stored in it :\n");
+    printf("    ->GAME NUMBER ONE .\n");
+    printf("    ->GAME NUMBER TWO .\n");
+    printf("    ->GAME NUMBER THREE .\n");
     scanf("%d",&number_game);
-    while(number_game>3)
+
+   if(number_game>size){
+
+    printf("    this game not existed \n");
+    return_value=1;
+    return return_value;
+   }
+
+    while((number_game!=3)&&(number_game!=1)&&(number_game!=2))
     {
         printf("number between 1:3 :\n");
         scanf("%d",&number_game);
+
     }
 
-    for(i=1; i<=10; i++)
+    for(i=1; i<=3; i++)
     {
 
         if(i==number_game)
         {
-            x =sizeof(grid)*(number_game-1);
+            x =sizeof(storeGrid)*(number_game-1);
             fseek(address_file,x,SEEK_SET);
-            fread(&grid, sizeof(grid), 1, address_file);
+            fread(&grid, sizeof(storeGrid), 1, address_file);
         }
     }
 
@@ -418,23 +122,54 @@ void load_game()
     player2.score=grid.score2;
     player2.moves=grid.moves2;
 
+     if (grid.moves1<=grid.moves2) {
+        moves = 0;
+        lastMove = 0;
+        inLoadedGame = 0;
+    }
+    else {
+        moves = 1;
+        lastMove = 1;
+        inLoadedGame = 1;
+    }
+
+
+    undoList[0].movingPlayer = player1;
+    undoList[1].movingPlayer = player2;
+    undoList[2].movingPlayer = player1;
+
     fclose(address_file);
 
     system("cls");
 
 
-
-
-    load_player();
+    return return_value;
 }
 
-
-
-void save_game(char gridarr[ROW][COL],playerData player1,playerData  player2)
+void save_game(int ROW,int COL,char gridarr[ROW][COL],playerData player1,playerData  player2,gameInfo undoList[])
 {
-    int i,j;
+     typedef struct
+{
+
+    char gridArr[ROW][COL];
+
+    int score1;
+    int moves1;
+    int score2;
+    int moves2;
+
+} storeGrid;
+storeGrid *save_games;
+
+storeGrid grid;
+
+    int i,j,chooseSaveOR;
+    long int size;
 
     FILE *address_file;
+
+
+
 
     address_file=fopen("st.bin","ab");
 
@@ -454,33 +189,94 @@ void save_game(char gridarr[ROW][COL],playerData player1,playerData  player2)
     }
     grid.score1= player1.score;
     grid.moves1=player1.moves;
-
     grid.score2=player2.score;
     grid.moves2= player2.moves;
 
+    fwrite(&grid, sizeof(storeGrid), 1, address_file);
+    fclose(address_file);
+    address_file=fopen("st.bin","rb ");
+    fseek(address_file,0,SEEK_END);
+    size=ftell(address_file);
+    size=(size)/(sizeof(storeGrid));
 
-    fwrite(&grid, sizeof(grid), 1, address_file);
+    if(size>3){
+
+        printf("the storage of the game is FULL\n");
+        printf("IF YOU WANT TO DELETE THE FIRST GAME AND STORE YOUR GAME  PRESS 1\n");
+        printf("IF NOT PRESS  2\n");
 
 
+        scanf("%d",&chooseSaveOR);
+
+          if(chooseSaveOR==1){
+                  save_games=malloc(sizeof(storeGrid)*3);
+                   fseek(address_file,-3*sizeof(storeGrid),SEEK_END);
+                     fread(save_games,sizeof(storeGrid),3,address_file);
+                      fclose(address_file);
+
+                       address_file=fopen("st.bin","wb");
+                       fwrite(save_games, sizeof(storeGrid),3, address_file);
+                       fclose(address_file);
+                       free(save_games);
+
+
+                 load_player(ROW,COL,gridarr,undoList);
+                return;
+       }
+
+        else if(chooseSaveOR==2){
+                 load_player(ROW,COL,gridarr,undoList);
+
+                return;
+       }
+    }
+
+
+
+     if((size<=3)&&(size>=1)){
+     save_games=malloc(sizeof(storeGrid)*size);
+     }
+
+
+
+
+
+    fseek(address_file,0,SEEK_SET);
+    fread(save_games,sizeof(storeGrid),size,address_file);
     fclose(address_file);
 
-}
-void chooseMenu ( int enteredColumn)
+
+
+    address_file=fopen("st.bin","wb");
+    fwrite(save_games, sizeof(storeGrid),size, address_file);
+    fclose(address_file);
+    free(save_games);
+
+}*/
+
+void chooseMenu ( int ROW,int COL,char gridarr[ROW][COL],int enteredColumn,gameInfo undoList[])
 {
 
 
     if ( enteredColumn == 11)
     {
-        if (moves>0)
-        {
-            undo(&moves);
+        if (!inLoadedGame) {
+          if (moves>0)
+            {
+                undo(ROW,COL,gridarr,&moves,undoList);
+            }
+        }
+        else {
+            if (moves>1) {
+                undo(ROW,COL,gridarr,&moves,undoList);
+            }
         }
     }
     else if ( enteredColumn == 22)
     {
         if (moves<lastMove)
         {
-            redo(&moves);
+            redo(ROW,COL,gridarr,&moves,undoList);
         }
     }
 
@@ -488,38 +284,31 @@ void chooseMenu ( int enteredColumn)
     else if(enteredColumn == 33)
     {
 
-        save_game(gridarr,player1,player2);
+        save_game(ROW,COL,gridarr,player1,player2,undoList);
     }
     else if(enteredColumn == 44)
     {
-
-
+        main_manu(ROW,COL,gridarr);
     }
 
 }
 void printMenu()
 {
-
-
     printf("Enter 1 to undo press 11\n");
     printf("Enter 2 to redo press 22\n");
     printf("Enter 3 to save press 33\n");
     printf("Enter 4 to exit prss 44\n");
-
-
-
-
 }
 
 
-void updateUndoList (playerData playerMoved, int i, int j, int moveNumber)
+void updateUndoList (int ROW,int COL,char gridarr[ROW][COL],playerData playerMoved, int i, int j, int moveNumber,gameInfo undoList[])
 {
     undoList[moveNumber].i = i;
     undoList[moveNumber].j = j;
     undoList[moveNumber+2].movingPlayer = playerMoved;
 }
 
-void undo (int *move)
+void undo (int ROW, int COL, char gridarr[ROW][COL],int *move, gameInfo undoList[])
 {
     gridarr[(undoList[*move-1]).i][(undoList[*move-1]).j] = '-';
     playerData *movedPlayer;
@@ -538,7 +327,7 @@ void undo (int *move)
     *move=*move - 1;
 }
 
-void redo (int *move)
+void redo (int ROW,int COL,char gridarr[ROW][COL],int *move, gameInfo undoList[])
 {
     gridarr[undoList[*move].i][undoList[*move].j] = undoList[*move].movingPlayer.identifier;
     playerData *movedPlayer;
@@ -583,7 +372,7 @@ void addMoves(playerData *player)
 
 
 
-int countHorizontally (_Bool counted, int i, int j)
+int countHorizontally (int ROW,int COL,char gridarr[ROW][COL],_Bool counted, int i, int j)
 {
     int sum = 0;
     if (j-3>=0)
@@ -618,7 +407,7 @@ int countHorizontally (_Bool counted, int i, int j)
 }
 
 //replace the number 9 with the hight variable of the grid
-int countVertically(_Bool counted,int i, int j)
+int countVertically(int ROW,int COL,char gridarr[ROW][COL],_Bool counted,int i, int j)
 {
     if (i+3<ROW)
     {
@@ -630,7 +419,7 @@ int countVertically(_Bool counted,int i, int j)
     }
 }
 
-int countDiagonally(_Bool counted, int i, int j)
+int countDiagonally(int ROW,int COL,char gridarr[ROW][COL],_Bool counted, int i, int j)
 {
     int sum = 0;
     //checks the main diagonal
@@ -694,14 +483,14 @@ int countDiagonally(_Bool counted, int i, int j)
     return sum;
 }
 
-void updateScore(playerData *player, int i, int j)
+void updateScore(int ROW,int COL,char gridarr[ROW][COL],playerData *player, int i, int j)
 {
-    player->score += countHorizontally(player->identifier,i,j) + countVertically(player->identifier,i,j) + countDiagonally(player->identifier,i,j);
+    player->score += countHorizontally(ROW,COL,gridarr,player->identifier,i,j) + countVertically(ROW,COL,gridarr,player->identifier,i,j) + countDiagonally(ROW,COL,gridarr,player->identifier,i,j);
 }
 
 
 
-void original_grid( char gridarr[ROW][COL])
+void original_grid(int ROW,int COL, char gridarr[ROW][COL])
 {
     int j,i;
     for(i=0; i<ROW; i++)
@@ -714,7 +503,7 @@ void original_grid( char gridarr[ROW][COL])
 }
 
 
-void print(char gridarr[ROW][COL])
+void print(int ROW,int COL,char gridarr[ROW][COL])
 {
     int j,i;
     for(i=1; i<=COL; i++)
@@ -765,7 +554,7 @@ void print(char gridarr[ROW][COL])
 }
 
 
-void putDisk(char gridarr[ROW][COL],int j,_Bool *identify,int *moves)
+void putDisk(int ROW,int COL,char gridarr[ROW][COL],int j,_Bool *identify,int *moves, gameInfo undoList[])
 {
     int i = ROW -1;
     while(1)
@@ -775,9 +564,9 @@ void putDisk(char gridarr[ROW][COL],int j,_Bool *identify,int *moves)
             if(*identify==0)
             {
                 gridarr[i][j]=0;
-                updateScore(&player1,i,j);
+                updateScore(ROW, COL,gridarr,&player1,i,j);
                 addMoves(&player1);
-                updateUndoList(player1,i,j,*moves);
+                updateUndoList( ROW, COL,gridarr,player1,i,j,*moves,undoList);
                 (*moves)++;
                 break;
             }
@@ -785,9 +574,9 @@ void putDisk(char gridarr[ROW][COL],int j,_Bool *identify,int *moves)
             else if(*identify==1)
             {
                 gridarr[i][j]=1;
-                updateScore(&player2,i,j);
+                updateScore(ROW, COL,gridarr,&player2,i,j);
                 addMoves(&player2);
-                updateUndoList(player2,i,j,*moves);
+                updateUndoList(ROW, COL,gridarr,player2,i,j,*moves,undoList);
                 (*moves)++;
                 break;
             }
@@ -799,12 +588,12 @@ void putDisk(char gridarr[ROW][COL],int j,_Bool *identify,int *moves)
     }
 }
 
-void play(char gridarr[ROW][COL],int *moves,_Bool *identify)
+void play(int ROW,int COL,char gridarr[ROW][COL],int *moves,_Bool *identify, gameInfo undoList[])
 {
     int enteredColumn;
     //clear console and update it with previous action
     system("cls");
-    print(gridarr);
+    print(ROW, COL,gridarr);
 
     //decide which player is about to play
     *identify = ((*moves)%2);
@@ -814,14 +603,13 @@ void play(char gridarr[ROW][COL],int *moves,_Bool *identify)
 
     if ((enteredColumn==11)||(enteredColumn==22)||(enteredColumn==33)||(enteredColumn==44))
     {
-        chooseMenu(enteredColumn);
+        chooseMenu(ROW,COL,gridarr,enteredColumn,undoList);
         return;
     }
     while(!(enteredColumn>0&&enteredColumn<=COL))
     {
         printf("enter valid columns between 1:%d:\n",COL);
         scanf("%d",&enteredColumn);
-
     }
 
     while(gridarr[0][enteredColumn-1]!='-')
@@ -830,25 +618,23 @@ void play(char gridarr[ROW][COL],int *moves,_Bool *identify)
         scanf("%d",&enteredColumn);
     }
 
-    putDisk(gridarr,enteredColumn-1,identify,moves);
+    putDisk(ROW, COL,gridarr,enteredColumn-1,identify,moves,undoList);
     int *lastMovePlayed = &lastMove;
     *lastMovePlayed = *moves;
 }
-void new_game()
+void new_game(int ROW,int COL,char gridarr[ROW][COL],gameInfo undoList[])
 {
-
     lastMove=0;
     moves=0;
+    original_grid(ROW, COL,gridarr);
+    player1.moves = 0;
+    player1.score = 0;
+    player2.moves = 0;
+    player2.score = 0;
 
-    original_grid(gridarr);
-    playerData player1 = {0,0,0};
-    playerData player2 = {0,0,1};
-
-
-    play(gridarr,&moves,&playerIdentifer);
-
+    play(ROW,COL,gridarr,&moves,&playerIdentifer,undoList);
 }
-void load_player( )
+void load_player(int ROW,int COL,char gridarr[ROW][COL], gameInfo undoList[])
 {
 
     while(1)
@@ -857,39 +643,48 @@ void load_player( )
         if((player1.moves+player2.moves)==(COL*ROW))
         {
             system("cls");
-            print(gridarr);
+            print(ROW, COL,gridarr);
             printf("game end\n");
-            int xx=1;
-            top_rank(xx,player1.score,player2.score);
+            //deleted xx = 1 and replaced first parameter with 1 instead of xx
+            top_rank(1,player1.score,player2.score);
             printf("    1->main.\n");
             printf("    2->exit.\n");
             scanf("%d",&choose);
 
             if(choose==1)
             {
-
-
-                main_manu();
-
-
+                main_manu(ROW,COL,gridarr);
+                return;
             }
             else if(choose==2)
-            {
-               return;
+            {l
+                return;
             }
         }
-        play(gridarr,&moves,&playerIdentifer);
+        play(ROW,COL,gridarr,&moves,&playerIdentifer,undoList);
     }
 
 }
-void main_manu()
+void main_manu(int ROW,int COL,char gridarr[ROW][COL])
 {
+    int return_value;
+    gameInfo undoList[ROW*COL+2]; //= {{0,0,{0,0,0}},{0,0,{0,0,1}}};
+    //initializing undo list
+    undoList[0].i=0;
+    undoList[0].j=0;
+    undoList[0].movingPlayer.identifier=0;
+    undoList[0].movingPlayer.moves=0;
+    undoList[0].movingPlayer.score=0;
+    undoList[1].i=0;
+    undoList[1].j=0;
+    undoList[1].movingPlayer.identifier=1;
+    undoList[1].movingPlayer.moves=0;
+    undoList[1].movingPlayer.score=0;
 
     char choose_manu;
 
     printf("-------------------------MAIN MANU--------------------------\n");
     printf("    1->start a new game.\n");
-
     printf("    2->load a game last games.\n");
     printf("    3->Top players.\n");
     printf("    4->Quit\n");
@@ -905,44 +700,83 @@ void main_manu()
     }
     if(choose_manu==49)
     {
-        new_game();
-
-        load_player( );
+        inLoadedGame = 0;
+        new_game(ROW,COL,gridarr,undoList);
+        load_player(ROW,COL,gridarr,undoList);
 
     }
     if(choose_manu==50)
     {
 
-        load_game();
+
+        return_value=load_game(ROW,COL,gridarr,undoList);
+       if(return_value==0){
+
+        load_player(ROW,COL,gridarr,undoList);
+
+
+        return;
+         }
+        if(return_value==1){
+
+             main_manu(ROW,COL,gridarr);
+            return;
+        }
+
 
     }
     if(choose_manu==51)
     {
         int xx=0;
+
         top_rank(xx,player1.score,player2.score);
+        printf("    1->main.\n");
+        printf("    2->exit.\n");
+        scanf("%d",&choose);
+         if(choose==1)
+            {
+                main_manu(ROW,COL,gridarr);
+                return;
+            }
+            else if(choose==2)
+            {
+
+                return;
+            }
+
 
     }
     if(choose_manu==52)
     {
-        return 0;
+        exit(0);
     }
 
-
+  return;
 
 
 }
 int main()
 {
 
+    int ROW=9,COL=7,highScores=10;
+    char gridArr[ROW][COL];
+    char configFilePath[1000] = "configure.xml";
 
+    for (int i=0; i<3; i++) {
+        _Bool recieved = readParametars(&COL,&ROW,&highScores,configFilePath);
+        if (recieved) break;
+        else {
+            printf("Configuration file is corrupted or doesn't exist, please enter a path for a valid file\n");
+            gets(configFilePath);
+        }
+    }
 
     lastMove=0;
     moves=0;
-    original_grid(gridarr);
+    original_grid(ROW,COL,gridArr);
     start_time=clock();
 
-    main_manu();
+    main_manu(ROW,COL,gridArr);
 
     return 0;
 }
-
