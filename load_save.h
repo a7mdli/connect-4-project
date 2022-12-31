@@ -255,7 +255,7 @@ storeGrid grid;
     size=(size)/(sizeof(storeGrid));
 
     if(size>3){
-
+     /*
         printf("the storage of the game is FULL\n");
         printf("IF YOU WANT TO DELETE THE FIRST GAME AND STORE YOUR GAME  PRESS 1\n");
         printf("IF NOT PRESS  2\n");
@@ -275,14 +275,14 @@ storeGrid grid;
                        address_file=fopen("st.bin","wb");
                        fwrite(save_games, sizeof(storeGrid),3, address_file);
                        fclose(address_file);
-                       free(save_games);
+                       free(save_games);*/
 
-                    /*  printf("--------------the storage is full-------------- ");
-                       sleep(3);*/
+                      printf("--------------the storage is full-------------- ");
+                       sleep(3);
 
 
                  load_player(ROW,COL,gridarr,undoList);
-                return;}}
+                return;}
 
 
         else if(chooseSaveOR==2){
