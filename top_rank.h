@@ -2,9 +2,9 @@
 int noOne_win=0;
 int choose_best(int g, long int  size,winner_players  *rank);
 int  check(int i,long int size,winner_players *rank);
-void top_rank(int yy,int score1,int score2);
+void top_rank(int yy,int score1,int score2,int high_score);
 void top_players(int yy,int score1,int score2);
-void display_toPrank(long int size,winner_players *rank);
+void display_toPrank(long int size,winner_players *rank,int high_score);
 
 
 
@@ -171,12 +171,16 @@ void top_players(int yy,int score1,int score2)
 
 
 }
-void display_toPrank(long int size,winner_players *rank)
+void display_toPrank(long int size,winner_players *rank,int high_score)
 {
     int i;
     rank_file=fopen("rank.bin","rb");
     rank=malloc(sizeof(winner_players)*(size));
     fread(rank,sizeof(winner_players),size,rank_file);
+    if(size>=high_score){
+
+        size=high_score;
+    }
 
     for(i=0; i<size ; i++)
     {
@@ -203,14 +207,14 @@ void display_toPrank(long int size,winner_players *rank)
 
 
 }
-void top_rank(int yy,int score1,int score2)
+void top_rank(int yy,int score1,int score2,int high_score)
 {
     player2.score=score2;
     player1.score=score1;
     winner_players  *rank;
     int determin ;
     winner_players  ranke;
-
+    int scores,moves,number_structure,control;
     int x,dd=2;
     unsigned  long  i;
 
@@ -218,7 +222,7 @@ void top_rank(int yy,int score1,int score2)
 
     if(yy==0)
     {
-        int scores,moves,number_structure,control;
+
         rank_file=fopen("rank.bin","rb");
         fseek(rank_file,0L,SEEK_END);
         long int size=ftell(rank_file);
@@ -226,7 +230,7 @@ void top_rank(int yy,int score1,int score2)
         size=(size)/sizeof(winner_players);
 
 
-        display_toPrank(size,rank);
+        display_toPrank(size,rank,high_score);
         return;
 
 
@@ -314,11 +318,11 @@ void top_rank(int yy,int score1,int score2)
     if(noOne_win==0)
     {
         if(dd==1){
-           display_toPrank(size-1,rank);
+           display_toPrank(size-1,rank,high_score);
         }
         if(dd=0){
 
-        display_toPrank(size,rank);
+        display_toPrank(size,rank,high_score);
 
         }
     }
