@@ -151,6 +151,10 @@ void top_players(int yy,int score1,int score2)
     {
 
         printf("-------------------player2 win-----------------");
+        if (inVsComputer) {
+            noOne_win=1;
+            return;
+        }    
         printf("enter name your name player 1:\n");
         fscanf(stdin, " ");
         fgets(namee,100,stdin);
