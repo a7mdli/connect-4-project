@@ -2,7 +2,7 @@
 
 void save_game(int ROW,int COL,char gridarr[ROW][COL],playerData player1,playerData  player2,gameInfo undoList[]);
 int load_game(int ROW,int COL,char gridarr[ROW][COL],gameInfo undoList[]);
-
+int check_validsave(int ROW,int COL,char gridarr[ROW][COL]);
 
 int load_game(int ROW,int COL,char gridarr[ROW][COL],gameInfo undoList[])
 {
@@ -11,7 +11,7 @@ int load_game(int ROW,int COL,char gridarr[ROW][COL],gameInfo undoList[])
 {
 
     char gridArr[ROW][COL];
-    _Bool vs_computer;
+
     int score1;
     int moves1;
     int score2;
@@ -25,6 +25,14 @@ storeGrid grid;
     _Bool playerIdentifer=0;
     int i,j,return_value=0,number_game;
     long int  x,size;
+    int xx=check_validsave(ROW,COL,gridarr);
+    if(xx==1){
+
+
+        printf("-------------invalid load game--------- ");
+        sleep(1);
+        return;
+    }
 
 
     FILE*address_file;
@@ -32,7 +40,7 @@ storeGrid grid;
     fseek(address_file,0,SEEK_END);
     size=ftell(address_file);
     size=(size)/(sizeof(storeGrid));
-    printf("%ld",size);
+
 
 
     printf("    ->Enter place that your stored in it :\n");
@@ -109,7 +117,7 @@ storeGrid grid;
     player2.score=grid.score2;
     player2.moves=grid.moves2;
 
-    inVsComputer = grid.vs_computer;
+
 
      if (grid.moves1<=grid.moves2) {
         moves = 0;
@@ -136,7 +144,55 @@ storeGrid grid;
 
     return return_value;
 }
+int check_validsave(int ROW,int COL,char gridarr[ROW][COL]){
+ double check;
+ long int size;
+ FILE *address_file;
+   typedef struct
+{
 
+    char gridArr[ROW][COL];
+
+    int score1;
+    int moves1;
+    int score2;
+    int moves2;
+
+} storeGrid;
+
+    address_file=fopen("st.bin","ab ");
+
+    fseek(address_file,0,SEEK_END);
+
+    size=ftell(address_file);
+    fclose(address_file);
+    check=size;
+    printf("%ld",size);
+    check=check/(sizeof(storeGrid));
+
+
+    if((check-(int)check!=0)&&(size!=-1)){
+
+        return 1;
+
+    }
+    else if(check-(int)check==0){
+            return 0;
+
+
+    }
+
+
+  return 0;
+
+
+
+
+
+
+
+
+}
 
 void save_game(int ROW,int COL,char gridarr[ROW][COL],playerData player1,playerData  player2,gameInfo undoList[])
 {
@@ -144,7 +200,7 @@ void save_game(int ROW,int COL,char gridarr[ROW][COL],playerData player1,playerD
 {
 
     char gridArr[ROW][COL];
-    _Bool vs_computer;
+
     int score1;
     int moves1;
     int score2;
@@ -159,7 +215,14 @@ storeGrid grid;
     long int size;
 
     FILE *address_file;
+    int x=check_validsave(ROW,COL,gridarr);
+    if(x==1){
 
+
+        printf("-------------invalid saved game--------- ");
+        sleep(10);
+        return;
+    }
 
 
 
@@ -181,11 +244,8 @@ storeGrid grid;
     }
     grid.score1= player1.score;
     grid.moves1=player1.moves;
-
     grid.score2=player2.score;
     grid.moves2= player2.moves;
-
-    grid.vs_computer = inVsComputer;
 
     fwrite(&grid, sizeof(storeGrid), 1, address_file);
     fclose(address_file);
@@ -193,13 +253,32 @@ storeGrid grid;
     fseek(address_file,0,SEEK_END);
     size=ftell(address_file);
     size=(size)/(sizeof(storeGrid));
-    fclose(address_file);
+
     if(size>3){
+     /*
+        printf("the storage of the game is FULL\n");
+        printf("IF YOU WANT TO DELETE THE FIRST GAME AND STORE YOUR GAME  PRESS 1\n");
+        printf("IF NOT PRESS  2\n");
 
 
+        scanf("%d",&chooseSaveOR);
+
+          if(chooseSaveOR==1){
+                  save_games=malloc(sizeof(storeGrid)*3);
+
+
+
+                   fseek(address_file,-4*sizeof(storeGrid),SEEK_END);
+                     fread(save_games,sizeof(storeGrid),3,address_file);
+                      fclose(address_file);
+
+                       address_file=fopen("st.bin","wb");
+                       fwrite(save_games, sizeof(storeGrid),3, address_file);
+                       fclose(address_file);
+                       free(save_games);*/
 
                       printf("--------------the storage is full-------------- ");
-                       sleep(1);
+                       sleep(3);
 
 
                  load_player(ROW,COL,gridarr,undoList);
@@ -218,7 +297,7 @@ storeGrid grid;
      if((size<=3)&&(size>=1)){
      save_games=malloc(sizeof(storeGrid)*size);
      }
-
+    fclose(address_file);
 
 
     address_file=fopen("st.bin","rb");
