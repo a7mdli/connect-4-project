@@ -57,51 +57,6 @@ time_t start_time;
 char figures[2] = {'x','o'};
 
 
-void chooseMenu ( int ROW,int COL,char gridarr[ROW][COL],int enteredColumn,gameInfo undoList[])
-{
-
-
-    if ( enteredColumn == 11)
-    {
-        if (!inLoadedGame) {
-          if (moves>0)
-            {
-                undo(ROW,COL,gridarr,&moves,undoList);
-            }
-        }
-        else {
-            if (moves>1) {
-                undo(ROW,COL,gridarr,&moves,undoList);
-            }
-        }
-    }
-    else if ( enteredColumn == 22)
-    {
-        if (moves<lastMove)
-        {
-            redo(ROW,COL,gridarr,&moves,undoList);
-        }
-    }
-
-
-    else if(enteredColumn == 33)
-    {
-
-        save_game(ROW,COL,gridarr,player1,player2,undoList);
-    }
-    else if(enteredColumn == 44)
-    {
-        main_manu(ROW,COL,gridarr);
-    }
-
-}
-void printMenu()
-{
-    printf("Enter 1 to undo press 11\n");
-    printf("Enter 2 to redo press 22\n");
-    printf("Enter 3 to save press 33\n");
-    printf("Enter 4 to exit prss 44\n");
-}
 
 
 void updateUndoList (int ROW,int COL,char gridarr[ROW][COL],playerData playerMoved, int i, int j, int moveNumber,gameInfo undoList[])
@@ -352,8 +307,61 @@ void print(int ROW,int COL,char gridarr[ROW][COL])
     printf("\t-------------------------------------------\n");
     printf("\tScore of player 2:%d\n",player2.score);
     printf("\tmoves of player 2:%d\n",player2.moves);
+    printf("\tGAME MANU\n");
     display_time();
-    printMenu();
+
+}
+void chooseMenu ( int ROW,int COL,char gridarr[ROW][COL],int enteredColumn,gameInfo undoList[])
+{
+    char  usrx;
+     printMenu();
+     fscanf(stdin," ");
+     scanf("%c",&usrx);
+     while((usrx!='u')&&(usrx!='r')&&(usrx!='s')&&(usrx!='x')){
+        printf("---->enter valid charachter\n");
+           scanf("%c",&usrx);
+     }
+
+    if ( usrx== 'u')
+    {
+        if (!inLoadedGame) {
+          if (moves>0)
+            {
+                undo(ROW,COL,gridarr,&moves,undoList);
+            }
+        }
+        else {
+            if (moves>1) {
+                undo(ROW,COL,gridarr,&moves,undoList);
+            }
+        }
+    }
+    else if ( usrx == 'r')
+    {
+        if (moves<lastMove)
+        {
+            redo(ROW,COL,gridarr,&moves,undoList);
+        }
+    }
+
+
+    else if(usrx == 's')
+    {
+
+        save_game(ROW,COL,gridarr,player1,player2,undoList);
+    }
+    else if(enteredColumn == 'x')
+    {
+        main_manu(ROW,COL,gridarr);
+    }
+
+}
+void printMenu()
+{
+    printf("Enter 1 to undo press u\n");
+    printf("Enter 2 to redo press r\n");
+    printf("Enter 3 to save press s\n");
+    printf("Enter 4 to exit prss x\n");
 }
 
 
@@ -411,13 +419,13 @@ void play(int ROW,int COL,char gridarr[ROW][COL],int *moves,_Bool *identify, gam
          if(check_char!=1){
          gets(&enteredColumn);
 
-          printf("enter valid columns between 1:%d:\n",COL);
+          printf("enter valid columns between 0:%d:\n",COL);
 
 
          }
 
-         else if(!(enteredColumn>0&&enteredColumn<=COL)){
-            printf("enter valid columns between 1:%d:\n",COL);
+         else if(!(enteredColumn>=0&&enteredColumn<=COL)){
+            printf("enter valid columns between 0:%d:\n",COL);
             goto beging;
 
          }
@@ -429,7 +437,7 @@ void play(int ROW,int COL,char gridarr[ROW][COL],int *moves,_Bool *identify, gam
 
     }
 
-    if ((enteredColumn==11)||(enteredColumn==22)||(enteredColumn==33)||(enteredColumn==44))
+    if (enteredColumn==0)
     {
         chooseMenu(ROW,COL,gridarr,enteredColumn,undoList);
         return;
@@ -442,6 +450,7 @@ void play(int ROW,int COL,char gridarr[ROW][COL],int *moves,_Bool *identify, gam
     }
 
     putDisk(ROW, COL,gridarr,enteredColumn-1,identify,moves,undoList);
+
     int *lastMovePlayed = &lastMove;
     *lastMovePlayed = *moves;
 }
@@ -514,6 +523,7 @@ int check_char;
 }
 void main_manu(int ROW,int COL,char gridarr[ROW][COL])
 {
+    int check_char;
     int return_value;
     gameInfo undoList[ROW*COL+2]; //= {{0,0,{0,0,0}},{0,0,{0,0,1}}};
     //initializing undo list
@@ -536,23 +546,47 @@ void main_manu(int ROW,int COL,char gridarr[ROW][COL])
     printf("    3->Top players.\n");
     printf("    4->Quit\n");
     fscanf(stdin, " ");
-    scanf("%c",&choose_manu);
-    while((choose_manu!=49)&&(choose_manu!=50)&&(choose_manu!=51)&&(choose_manu!=52))
+    scanf("%d",&choose_manu);
+    while((choose_manu!=1)&&(choose_manu!=2)&&(choose_manu!=3)&&(choose_manu!=4))
     {
 
         printf("please enter number between 1:4\n");
-        fscanf(stdin, " ");
-        scanf("%c",&choose_manu);
+              while(1)
+    {
+        beging:
+
+         check_char=scanf("%d",&choose_manu);
+         if(check_char!=1){
+         gets(&choose_manu);
+
+          printf("--->enter number between 1:4 :\n");
+
+
+         }
+
+         else if(!(choose_manu>0&&choose_manu<=4)){
+            printf("---->enter  number between 1:4\n",COL);
+            goto beging;
+
+         }
+         else{
+
+            break;
+         }
+
 
     }
-    if(choose_manu==49)
+
+
+    }
+    if(choose_manu==1)
     {
         inLoadedGame = 0;
         new_game(ROW,COL,gridarr,undoList);
         load_player(ROW,COL,gridarr,undoList);
 
     }
-    if(choose_manu==50)
+    if(choose_manu==2)
     {
 
 
@@ -572,7 +606,7 @@ void main_manu(int ROW,int COL,char gridarr[ROW][COL])
 
 
     }
-    if(choose_manu==51)
+    if(choose_manu==3)
     {
         int xx=0;
 
@@ -593,7 +627,7 @@ void main_manu(int ROW,int COL,char gridarr[ROW][COL])
 
 
     }
-    if(choose_manu==52)
+    if(choose_manu==4)
     {
         exit(0);
     }
